@@ -1,0 +1,24 @@
+<<<<<<< HEAD
+let a = 23
+let b = 5.5
+
+
+print a
+print b
+
+let str = "HELLO"
+
+print str
+
+let bool = true
+print bool
+=======
+let x = false
+let y = true
+
+if x == false {
+    print "x is false"
+} else if y == true {
+    print "y is true"
+}
+>>>>>>> e710c45 (Added if/else statements)
