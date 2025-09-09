@@ -135,7 +135,6 @@ Variant parseTerm(std::vector<Token>& tokens, int& i)
         i++;
         Variant right = parseFactor(tokens, i);
 
-        // Проверка типов
         if (!std::holds_alternative<int>(left) && !std::holds_alternative<double>(left) ||
             !std::holds_alternative<int>(right) && !std::holds_alternative<double>(right))
         {
@@ -163,7 +162,6 @@ Variant parseExpr(std::vector<Token>& tokens, int& i)
         i++;
         Variant right = parseTerm(tokens, i);
 
-        // Проверка типов для арифметики
         if ((!std::holds_alternative<int>(left) && !std::holds_alternative<double>(left)) ||
             (!std::holds_alternative<int>(right) && !std::holds_alternative<double>(right)))
         {
