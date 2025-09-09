@@ -6,8 +6,6 @@ std::map<std::string, Variant> variables;
 
 Variant parseExpr(std::vector<Token>& tokens, int& i);
 
-<<<<<<< HEAD
-=======
 Variant parserCompretions(std::vector<Token>& tokens, int& i)
 {
     Variant left = parseExpr(tokens, i);
@@ -68,7 +66,6 @@ Variant parseLogic(std::vector<Token>& tokens, int& i)
     return left;
 }
 
->>>>>>> e710c45 (Added if/else statements)
 Variant parseFactor(std::vector<Token>& tokens, int& i)
 {
     Token t = tokens[i];
@@ -93,36 +90,6 @@ Variant parseFactor(std::vector<Token>& tokens, int& i)
         i++;
         return t.value;
     }
-<<<<<<< HEAD
-    /*else if (t.type == "IDENT")
-    {
-        std::string varName = t.value;
-        i++;
-
-        if (variables.find(varName) == variables.end()) 
-        {
-            throw std::runtime_error("Varible not found: " + varName);
-        }
-
-        return std::visit([](auto&& arg) -> double
-        {
-            using T = std::decay_t<decltype(arg)>;
-            if constexpr (std::is_same_v<T, int>) 
-            {
-                return static_cast<double>(arg);
-            } 
-            else if constexpr (std::is_same_v<T, double>) 
-            {
-                return arg;
-            } 
-            else 
-            {
-                throw std::runtime_error("Нельзя использовать нечисловую переменную в выражении");
-            }
-        }, variables[varName]);
-    } */
-=======
->>>>>>> e710c45 (Added if/else statements)
     else if (t.type == "IDENT") 
     {
         std::string varName = t.value;
@@ -268,8 +235,6 @@ Variant evaluate(std::vector<Token>& tokens)
                 }, variables[next.value]);
             }
         }
-<<<<<<< HEAD
-=======
         else if (t.type == "HEYWORD" && t.value == "if")
         {
             i++;
@@ -309,7 +274,6 @@ Variant evaluate(std::vector<Token>& tokens)
                 }
             }
         }
->>>>>>> e710c45 (Added if/else statements)
         else
         {
             i++;
