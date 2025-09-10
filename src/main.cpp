@@ -14,10 +14,14 @@ int main()
     std::string code = buffer.str();
     auto tokens = tokenize(code);
 
+    std::ofstream out("tokens.log");
+
     for (auto &t : tokens)
     {
-        std::cout << t.type << " -> " << t.value << std::endl;
+        out << t.type << " -> " << t.value << std::endl;
     }
+
+    out.close();
 
     auto result = evaluate(tokens);
     return 0;

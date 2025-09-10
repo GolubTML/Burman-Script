@@ -43,13 +43,13 @@ Variant parserCompretions(std::vector<Token>& tokens, int& i)
 
 Variant parseLogic(std::vector<Token>& tokens, int& i)
 {
-    Variant left = parseExpr(tokens, i);
+    Variant left = parserCompretions(tokens, i);
 
     while (i < tokens.size() && (tokens[i].value == "&&" || tokens[i].value == "||"))
     {
         std::string op = tokens[i].value;
         i++;
-        Variant right = parseExpr(tokens, i);
+        Variant right = parserCompretions(tokens, i);
 
         if (!std::holds_alternative<bool>(left) || !std::holds_alternative<bool>(right))
         {
@@ -233,7 +233,7 @@ Variant evaluate(std::vector<Token>& tokens)
                 }, variables[next.value]);
             }
         }
-        else if (t.type == "HEYWORD" && t.value == "if")
+        else if (t.type == "KEYWORD" && t.value == "if")
         {
             i++;
 
@@ -255,7 +255,7 @@ Variant evaluate(std::vector<Token>& tokens)
                 evaluate(blockTokens);
             else
             {
-                if (i < tokens.size() && t.type == "HEYWORD" && t.value == "else")
+                if (i < tokens.size() && t.type == "KEYWORD" && t.value == "else")
                 {
                     i++;
 
@@ -270,6 +270,40 @@ Variant evaluate(std::vector<Token>& tokens)
                     i++;
                     evaluate(elseTokens);
                 }
+            }
+        }
+        else if (t.type == "KEYWORD" && t.value == "while")
+        {
+            i++;
+            
+            int startPos = i;
+            Variant condition = parseLogic(tokens, i);
+
+            if (!std::holds_alternative<bool>(condition))
+                throw std::runtime_error("Условие while должно быть булевым");
+
+            if (tokens[i].value != "{")
+                throw std::runtime_error("После while цикла должено стоять {");
+
+            i++;
+
+            std::vector<Token> conditionBlock;
+            while (i < tokens.size() && tokens[i].value != "}")
+                conditionBlock.push_back(tokens[i++]);
+            i++;
+
+            while (true)
+            {
+                int index = startPos;
+                Variant condValue = parseLogic(tokens, index);
+                
+                if (!std::holds_alternative<bool>(condValue))
+                    throw std::runtime_error("Условие while должно быть булевым");
+
+                if (!std::get<bool>(condValue))
+                    break;
+
+                evaluate(conditionBlock);
             }
         }
         else
