@@ -306,6 +306,28 @@ Variant evaluate(std::vector<Token>& tokens)
                 evaluate(conditionBlock);
             }
         }
+        else if (t.type == "IDENT" && i + 1 < tokens.size() && tokens[i + 1].value == "++")
+        {
+            std::string varName = t.value;
+
+            if (!std::holds_alternative<int>(variables[varName]) && !std::holds_alternative<double>(variables[varName]))
+                throw std::runtime_error("Cannot use ++ on non digit variables.");
+
+            double var = getNumber(variables[varName]);
+            variables[varName] = var + 1;
+            i += 2;
+        }
+        else if (t.type == "IDENT" && i + 1 < tokens.size() && tokens[i + 1].value == "--")
+        {
+            std::string varName = t.value;
+
+            if (!std::holds_alternative<int>(variables[varName]) && !std::holds_alternative<double>(variables[varName]))
+                throw std::runtime_error("Cannot use -- on non digit variables.");
+
+            double var = getNumber(variables[varName]);
+            variables[varName] = var - 1;
+            i += 2;
+        }
         else
         {
             i++;

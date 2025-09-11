@@ -1,7 +1,6 @@
 let i = 1
-let j = true
-let k = false
 
-while i != 0 {
-    print "Yes"
+while i < 20 {
+    print "Hello"
+    i++;
 }

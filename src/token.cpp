@@ -35,7 +35,7 @@ std::vector<Token> tokenize(const std::string& src)
             }
             --i;
 
-            if (ident == "let" || ident == "print" || ident == "if" || ident == "else" || ident == "while")
+            if (ident == "let" || ident == "print" || ident == "if" || ident == "else" || ident == "while" || ident == "func")
                 tokens.push_back({"KEYWORD", ident});
             else if (ident == "true" || ident == "false")
                 tokens.push_back({"BOOL", ident});
@@ -50,6 +50,16 @@ std::vector<Token> tokenize(const std::string& src)
                 str += src[i++];
 
             tokens.push_back({"STRING", str});
+        }
+        else if (c == '+' && i + 1 < src.size() && src[i + 1] == '+')
+        {
+            tokens.push_back({"OPERATOR", "++"});
+            i++;
+        }
+        else if (c == '-' && i + 1 < src.size() && src[i + 1] == '-')
+        {
+            tokens.push_back({"OPERATOR", "--"});
+            i++;
         }
         else if (c == '+' || c == '-' || c == '/' || c == '*')
         {
