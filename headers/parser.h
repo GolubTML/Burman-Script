@@ -9,7 +9,13 @@ struct Functions
     std::vector<Token> body;
 };
 
+
 using Variant = std::variant<int, double, std::string, bool>;
+
+struct ReturnException {
+    Variant value;
+    ReturnException(const Variant& v) : value(v) {}
+};
 
 extern std::map<std::string, Variant> variables;
 extern std::map<std::string, Functions> funcTable;

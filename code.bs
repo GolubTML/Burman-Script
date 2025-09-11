@@ -4,3 +4,19 @@ while i < 20 {
     print "Hello"
     i++;
 }
+
+
+func hello(name) {
+    print name
+}
+
+let userName = "World"
+
+hello(userName)
+
+func add(a, b) {
+    return a + b
+}
+
+let sum = add(5, 4)
+print sum

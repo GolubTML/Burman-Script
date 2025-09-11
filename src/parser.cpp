@@ -3,6 +3,7 @@
 #include "../headers/parser.h"
 
 std::map<std::string, Variant> variables;
+std::map<std::string, Functions> funcTable;
 
 Variant parseExpr(std::vector<Token>& tokens, int& i);
 
@@ -95,6 +96,51 @@ Variant parseFactor(std::vector<Token>& tokens, int& i)
         std::string varName = t.value;
         i++;
 
+        if (i < tokens.size() && tokens[i].value == "(")
+        {
+            std::string funcName = varName;
+            i++;
+            
+            std::vector<Variant> callArgs;
+            while (i < tokens.size() && tokens[i].value != ")")
+            {
+                if (tokens[i].value == ",") 
+                { 
+                    i++; 
+                    continue; 
+                }
+            
+                callArgs.push_back(parseExpr(tokens, i));
+            }
+
+            if (i >= tokens.size() || tokens[i].value != ")")
+                throw std::runtime_error("Expected ')' at the end of the fucntions");
+            i++;
+
+            if (funcTable.find(funcName) == funcTable.end())
+                throw std::runtime_error("Function not found: " + funcName);
+
+            Functions func = funcTable[funcName];
+            if (func.args.size() != callArgs.size())
+                throw std::runtime_error("Not found function with this amount of arguments\nFunction name: " + funcName);
+
+            std::map<std::string, Variant> backup = variables;
+            for (size_t j = 0; j < func.args.size(); j++)
+                variables[func.args[j]] = callArgs[j];
+
+            Variant res;
+            try 
+            {
+                res = evaluate(func.body);
+            }
+            catch (ReturnException& re)
+            {
+                res = re.value;
+            }
+
+            variables = backup;
+            return res;
+        }
         if (variables.find(varName) == variables.end()) 
             throw std::runtime_error("Variable not found: " + varName);
 
@@ -202,6 +248,65 @@ Variant evaluate(std::vector<Token>& tokens)
             Variant value = parseExpr(tokens, i);
             variables[varName] = value;
             result = value;
+        }
+        else if (t.type == "KEYWORD" && t.value == "func")
+        {
+            i++;
+            std::vector<std::string> args;
+            std::string funcName = tokens[i].value;
+            i++;
+
+            if (tokens[i].value != "(")
+                throw std::runtime_error("No '(' in function declaration");
+            i++;
+
+            while (i < tokens.size() && tokens[i].value != ")")
+            {
+                if (tokens[i].type == "IDENT")
+                {
+                    args.push_back(tokens[i].value);
+                    //std::cout << "Func " << funcName << " args: " << args.size() << std::endl;
+                    i++;
+                }
+                else
+                {
+                    throw std::runtime_error("Unexpected token in function args: " + tokens[i].value);
+                }
+            
+                if (tokens[i].value == ",")
+                    i++;
+            }
+
+            if (tokens[i].value != ")")
+                throw std::runtime_error("No ')' in function declaration");
+            i++;
+
+            if (tokens[i].value != "{")
+                throw std::runtime_error("No '{' in function declaration");
+            i++;
+
+            std::vector<Token> funcBody;
+            int braceCount = 1;
+            while (i < tokens.size() && braceCount > 0) 
+            {
+                if (tokens[i].value == "{") braceCount++;
+                else if (tokens[i].value == "}") braceCount--;
+            
+                if (braceCount > 0) funcBody.push_back(tokens[i]);
+                i++;
+            }
+
+            funcTable[funcName] = {args, funcBody};
+        }
+        /*else if (t.type == "IDENT" && i + 1 < tokens.size() && tokens[i + 1].value == "(")
+        {
+            
+        } */
+        else if (t.type == "KEYWORD" && t.value == "return")
+        {
+            i++;
+            Variant retValue = parseExpr(tokens, i);
+            throw ReturnException(retValue); 
         }
         else if (t.type == "KEYWORD" && t.value == "print")
         {
