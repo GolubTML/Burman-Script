@@ -77,6 +77,15 @@ std::vector<Token> tokenize(const std::string& src)
 
             tokens.push_back({"OPERATOR", op});
         }
+        else if ((c == '&' && i + 1 < src.size() && src[i + 1] == '&') || (c == '|' && i + 1 < src.size() && src[i + 1] == '|'))
+        {
+            std::string op;
+            op += c;
+            op += src[i + 1];
+            tokens.push_back({"OPERATOR", op});
+            i++;
+        }
+
         else
         {
             tokens.push_back({"SYMBOL", std::string(1, c)});

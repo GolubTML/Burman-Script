@@ -2,6 +2,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <chrono>
 #include "../headers/token.h"
 #include "../headers/parser.h"
 
@@ -23,6 +24,12 @@ int main()
 
     out.close();
 
+    auto start = std::chrono::high_resolution_clock::now();
     auto result = evaluate(tokens);
+    auto end = std::chrono::high_resolution_clock::now();
+
+    std::cout << "Execution time: " 
+          << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
+          << " ms" << std::endl;
     return 0;
 }

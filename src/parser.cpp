@@ -88,8 +88,11 @@ Variant parseFactor(std::vector<Token>& tokens, int& i)
     else if (t.type == "STRING")
     {
         std::string str = t.value;
+        if (!str.empty() && str.front() == '"' && str.back() == '"')
+            str = str.substr(1, str.size() - 2);
+
         i++;
-        return t.value;
+        return str;
     }
     else if (t.type == "IDENT") 
     {
@@ -310,33 +313,17 @@ Variant evaluate(std::vector<Token>& tokens)
         }
         else if (t.type == "KEYWORD" && t.value == "print")
         {
-            Token next = tokens[++i];
+            i++;
+            Variant value = parseExpr(tokens, i);
 
-            if (next.type == "DIGIT")
-                std::cout << std::stoi(next.value) << std::endl;
-            else if (next.type == "FLOAT")
-                std::cout << std::stod(next.value) << std::endl;
-            else if (next.type == "BOOL")
-                std::cout << (next.value == "true" ? "true" : "false") << std::endl;
-            else if (next.type == "STRING")
-                std::cout << next.value << std::endl;
-            else if (next.type == "IDENT")
+            std::visit([](auto&& arg) 
             {
-                if (variables.find(next.value) == variables.end())
-                {
-                    throw std::runtime_error("Переменная не найдена: " + next.value);
-                }
-                std::visit([](auto&& arg) {
-                    using T = std::decay_t<decltype(arg)>;
-
-                    if constexpr (std::is_same_v<T, bool>)
-                        std::cout << (arg ? "true" : "false") << std::endl;
-                    else if constexpr (std::is_same_v<T, std::string>)
-                        std::cout << arg << std::endl;
-                    else
-                        std::cout << arg << std::endl;
-                }, variables[next.value]);
-            }
+                using T = std::decay_t<decltype(arg)>;
+                if constexpr (std::is_same_v<T, bool>)
+                    std::cout << (arg ? "true" : "false") << std::endl;
+                else
+                    std::cout << arg << std::endl;
+            }, value);
         }
         else if (t.type == "KEYWORD" && t.value == "if")
         {
@@ -360,7 +347,7 @@ Variant evaluate(std::vector<Token>& tokens)
                 evaluate(blockTokens);
             else
             {
-                if (i < tokens.size() && t.type == "KEYWORD" && t.value == "else")
+                if (i < tokens.size() && tokens[i].type == "KEYWORD" && tokens[i].value == "else")
                 {
                     i++;
 

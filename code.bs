@@ -1,22 +1,17 @@
-let i = 1
+func fib(n) {
+    let a = 0
+    let b = 1
+    let i = 0
 
-while i < 20 {
-    print "Hello"
-    i++;
+    while i < n {
+        let temp = a
+        a = b
+        b = temp + b
+        i++
+        print a
+    }
+
+    return a
 }
 
-
-func hello(name) {
-    print name
-}
-
-let userName = "World"
-
-hello(userName)
-
-func add(a, b) {
-    return a + b
-}
-
-let sum = add(5, 4)
-print sum
+print fib(5)
