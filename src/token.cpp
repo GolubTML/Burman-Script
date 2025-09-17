@@ -35,7 +35,10 @@ std::vector<Token> tokenize(const std::string& src)
             }
             --i;
 
-            if (ident == "let" || ident == "print" || ident == "if" || ident == "else" || ident == "while" || ident == "func" || ident == "return")
+            if ((ident == "let" || ident == "print" || ident == "println" || ident == "input" || ident == "if" || ident == "else" || ident == "while" 
+                || ident == "func" || ident == "return" || ident == "int" || ident == "float" || ident == "str") /*
+            || (ident == "burman" || ident == "show" || ident == "input" || ident == "if" 
+            || ident == "else" || ident == "while" || ident == "func" || ident == "return") */)
                 tokens.push_back({"KEYWORD", ident});
             else if (ident == "true" || ident == "false")
                 tokens.push_back({"BOOL", ident});

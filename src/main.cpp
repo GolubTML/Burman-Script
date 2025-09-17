@@ -7,12 +7,17 @@
 #include "../headers/parser.h"
 
 
-int main()
+int main(int argc, char* argv[])
 {
-    std::ifstream file("code.bs");
+    if (argv[1] == nullptr)
+        throw std::runtime_error("No input files!");
+
+    std::ifstream file(argv[1]);
+
     std::stringstream buffer;
     buffer << file.rdbuf();
     std::string code = buffer.str();
+
     auto tokens = tokenize(code);
 
     std::ofstream out("tokens.log");
@@ -29,7 +34,7 @@ int main()
     auto end = std::chrono::high_resolution_clock::now();
 
     std::cout << "Execution time: " 
-          << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
-          << " ms" << std::endl;
+        << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
+        << " ms" << std::endl;
     return 0;
 }

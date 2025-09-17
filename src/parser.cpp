@@ -1,9 +1,31 @@
 #include <iostream>
 #include <string>
+#include <algorithm>
+#include <cctype>
 #include "../headers/parser.h"
 
 std::map<std::string, Variant> variables;
 std::map<std::string, Functions> funcTable;
+
+Variant convert(const std::string& line)
+{
+    bool isInt = !line.empty() && std::all_of(line.begin(), line.end(), [](char c){ return std::isdigit(c) || c == '-'; });
+     
+    if (isInt) 
+    {
+        try { return std::stoi(line); }
+        catch (...) { return line; }
+    }
+
+    bool isFloat = (line.find('.') != std::string::npos);
+    if (isFloat)
+    {
+        try { return std::stod(line); }
+        catch (...) { return line; }
+    }
+
+    return line;
+}
 
 Variant parseExpr(std::vector<Token>& tokens, int& i);
 
@@ -149,6 +171,73 @@ Variant parseFactor(std::vector<Token>& tokens, int& i)
 
         return variables[varName];
     } 
+    else if (t.type == "KEYWORD" && t.value == "input")
+    {
+        i++;
+        std::string line;
+        std::getline(std::cin, line);
+        return convert(line);
+    }
+    else if (t.type == "KEYWORD" && t.value == "int")
+    {
+        i++;
+        if (tokens[i].value != "(") throw std::runtime_error("Ожидался '(' после int");
+        i++;
+        Variant arg = parseExpr(tokens, i);
+        if (tokens[i].value != ")") throw std::runtime_error("Ожидался ')' после int");
+        i++;
+
+        if (std::holds_alternative<std::string>(arg))
+            return std::stoi(std::get<std::string>(arg));
+        if (std::holds_alternative<double>(arg))
+            return static_cast<int>(std::get<double>(arg));
+        if (std::holds_alternative<int>(arg))
+            return arg;
+        if (std::holds_alternative<bool>(arg))
+            return std::get<bool>(arg) ? 1 : 0;
+
+        throw std::runtime_error("Нельзя преобразовать в int");
+    }
+    else if (t.type == "KEYWORD" && t.value == "float")
+    {
+        i++;
+        if (tokens[i].value != "(") throw std::runtime_error("Ожидался '(' после float");
+        i++;
+        Variant arg = parseExpr(tokens, i);
+        if (tokens[i].value != ")") throw std::runtime_error("Ожидался ')' после float");
+        i++;
+
+        if (std::holds_alternative<std::string>(arg))
+            return std::stod(std::get<std::string>(arg));
+        if (std::holds_alternative<int>(arg))
+            return static_cast<double>(std::get<int>(arg));
+        if (std::holds_alternative<double>(arg))
+            return arg;
+        if (std::holds_alternative<bool>(arg))
+            return std::get<bool>(arg) ? 1 : 0;
+
+        throw std::runtime_error("Нельзя преобразовать в float");
+    }
+    else if (t.type == "KEYWORD" && t.value == "str")
+    {
+        i++;
+        if (tokens[i].value != "(") throw std::runtime_error("Ожидался '(' после str");
+        i++;
+        Variant arg = parseExpr(tokens, i);
+        if (tokens[i].value != ")") throw std::runtime_error("Ожидался ')' после str");
+        i++;
+
+        if (std::holds_alternative<int>(arg))
+            return std::to_string(std::get<int>(arg));
+        if (std::holds_alternative<double>(arg))
+            return std::to_string(std::get<double>(arg));
+        if (std::holds_alternative<std::string>(arg))
+            return arg;
+        if (std::holds_alternative<bool>(arg))
+        return std::get<bool>(arg) ? "true" : "false";
+
+        throw std::runtime_error("Нельзя преобразовать в str");
+    }
     else if (t.value == "(")
     {
         i++;
@@ -268,7 +357,6 @@ Variant evaluate(std::vector<Token>& tokens)
                 if (tokens[i].type == "IDENT")
                 {
                     args.push_back(tokens[i].value);
-                    //std::cout << "Func " << funcName << " args: " << args.size() << std::endl;
                     i++;
                 }
                 else
@@ -301,10 +389,6 @@ Variant evaluate(std::vector<Token>& tokens)
 
             funcTable[funcName] = {args, funcBody};
         }
-        /*else if (t.type == "IDENT" && i + 1 < tokens.size() && tokens[i + 1].value == "(")
-        {
-            
-        } */
         else if (t.type == "KEYWORD" && t.value == "return")
         {
             i++;
@@ -324,6 +408,27 @@ Variant evaluate(std::vector<Token>& tokens)
                 else
                     std::cout << arg << std::endl;
             }, value);
+        }
+        else if (t.type == "KEYWORD" && t.value == "println")
+        {
+            i++;
+            Variant value = parseExpr(tokens, i);
+
+            std::visit([](auto&& arg) 
+            {
+                using T = std::decay_t<decltype(arg)>;
+                if constexpr (std::is_same_v<T, bool>)
+                    std::cout << (arg ? "true" : "false");
+                else
+                    std::cout << arg;
+            }, value);
+        }
+        else if (t.type == "KEYWORD" && t.value == "input")
+        {
+            i++;
+            std::string line;
+            std::getline(std::cin, line);
+            result = convert(line);
         }
         else if (t.type == "KEYWORD" && t.value == "if")
         {
@@ -397,6 +502,64 @@ Variant evaluate(std::vector<Token>& tokens)
 
                 evaluate(conditionBlock);
             }
+        }
+        else if (t.type == "KEYWORD" && t.value == "int")
+        {
+            i++;
+            if (tokens[i].value != "(") throw std::runtime_error("Ожидался '(' после int");
+            i++;
+            Variant arg = parseExpr(tokens, i);
+            if (tokens[i].value != ")") throw std::runtime_error("Ожидался ')' после int");
+            i++;
+
+            if (std::holds_alternative<std::string>(arg))
+                return std::stoi(std::get<std::string>(arg));
+            if (std::holds_alternative<double>(arg))
+                return static_cast<int>(std::get<double>(arg));
+            if (std::holds_alternative<int>(arg))
+                return arg;
+            if (std::holds_alternative<bool>(arg))
+                return std::get<bool>(arg) ? 1 : 0;
+
+            throw std::runtime_error("Нельзя преобразовать в int");
+        }
+        else if (t.type == "KEYWORD" && t.value == "float")
+        {
+            i++;
+            if (tokens[i].value != "(") throw std::runtime_error("Ожидался '(' после float");
+            i++;
+            Variant arg = parseExpr(tokens, i);
+            if (tokens[i].value != ")") throw std::runtime_error("Ожидался ')' после float");
+            i++;
+
+            if (std::holds_alternative<std::string>(arg))
+                return std::stod(std::get<std::string>(arg));
+            if (std::holds_alternative<int>(arg))
+                return static_cast<double>(std::get<int>(arg));
+            if (std::holds_alternative<double>(arg))
+                return arg;
+            if (std::holds_alternative<bool>(arg))
+                return std::get<bool>(arg) ? 1 : 0;
+
+            throw std::runtime_error("Нельзя преобразовать в float");
+        }
+        else if (t.type == "KEYWORD" && t.value == "str")
+        {
+            i++;
+            if (tokens[i].value != "(") throw std::runtime_error("Ожидался '(' после str");
+            i++;
+            Variant arg = parseExpr(tokens, i);
+            if (tokens[i].value != ")") throw std::runtime_error("Ожидался ')' после str");
+            i++;
+
+            if (std::holds_alternative<int>(arg))
+                return std::to_string(std::get<int>(arg));
+            if (std::holds_alternative<double>(arg))
+                return std::to_string(std::get<double>(arg));
+            if (std::holds_alternative<std::string>(arg))
+                return arg;
+
+            throw std::runtime_error("Нельзя преобразовать в str");
         }
         else if (t.type == "IDENT" && i + 1 < tokens.size() && tokens[i + 1].value == "++")
         {

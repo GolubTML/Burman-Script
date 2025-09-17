@@ -1,0 +1,13 @@
+let WIDTH = 5
+let HEIGHT = 5
+
+let y = 0
+while y < HEIGHT {
+    y++
+    let x = 0
+    while x < WIDTH {
+        print "#"
+        x++
+    }
+    print ""
+}

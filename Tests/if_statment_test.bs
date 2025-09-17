@@ -1,0 +1,7 @@
+let i = 5
+
+if i <= 5 {
+    print "Number is OP"
+} else if i > 5 {
+    print "Number is worse"
+}

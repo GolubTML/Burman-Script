@@ -1,0 +1,9 @@
+let i = 23
+let j = 3.53
+let k = false
+let l = "Burman"
+
+print i
+print j
+print k
+print l
