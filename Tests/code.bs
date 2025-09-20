@@ -1,14 +1,4 @@
-let j = input
-print j + 10
-
-let i = "5"
-let b = int(i)
-print b + 5
-
-let s = "5.5"
-let q = float(s)
-print 5.5 + q
-
-let serega = input
-let g = str(serega)
-print g
+func hello(name) {
+    print name
+}
+hello("World")

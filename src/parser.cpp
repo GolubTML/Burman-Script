@@ -7,6 +7,27 @@
 std::map<std::string, Variant> variables;
 std::map<std::string, Functions> funcTable;
 
+std::vector<Token> parseBlock(std::vector<Token>& tokens, int& i)
+{
+    if (tokens[i].value != "{")
+        throw std::runtime_error("После while цикла должено стоять {");
+
+    i++;
+
+    std::vector<Token> conditionBlock;
+    int braceCount = 1;
+    while (i < tokens.size() && braceCount > 0)
+    {
+        if (tokens[i].value == "{") braceCount++;
+        else if (tokens[i].value == "}") braceCount--;
+    
+        if (braceCount > 0) conditionBlock.push_back(tokens[i]);
+        i++;
+    }
+
+    return conditionBlock;
+}
+
 Variant convert(const std::string& line)
 {
     bool isInt = !line.empty() && std::all_of(line.begin(), line.end(), [](char c){ return std::isdigit(c) || c == '-'; });
@@ -103,7 +124,7 @@ Variant parseFactor(std::vector<Token>& tokens, int& i)
     } 
     else if (t.type == "BOOL")
     {
-        bool value = (t.value == "true");
+        bool value = (t.value == "true" || t.value == "serega") ;
         i++;
         return value;
     }
@@ -163,22 +184,30 @@ Variant parseFactor(std::vector<Token>& tokens, int& i)
                 res = re.value;
             }
 
+            std::cerr << ">>> Calling function " << funcName << " with body size: " << func.body.size() << "\n";
+            for (auto &tok : func.body) {
+                std::cerr << tok.value << " ";
+            }
+            std::cerr << "\n";
+
+
             variables = backup;
             return res;
+
         }
         if (variables.find(varName) == variables.end()) 
             throw std::runtime_error("Variable not found: " + varName);
 
         return variables[varName];
     } 
-    else if (t.type == "KEYWORD" && t.value == "input")
+    else if (t.type == "KEYWORD" && (t.value == "input" || t.value == "fuck"))
     {
         i++;
         std::string line;
         std::getline(std::cin, line);
         return convert(line);
     }
-    else if (t.type == "KEYWORD" && t.value == "int")
+    else if (t.type == "KEYWORD" && (t.value == "int" || t.value == "pidor"))
     {
         i++;
         if (tokens[i].value != "(") throw std::runtime_error("Ожидался '(' после int");
@@ -198,7 +227,7 @@ Variant parseFactor(std::vector<Token>& tokens, int& i)
 
         throw std::runtime_error("Нельзя преобразовать в int");
     }
-    else if (t.type == "KEYWORD" && t.value == "float")
+    else if (t.type == "KEYWORD" && (t.value == "float" || t.value == "nefor"))
     {
         i++;
         if (tokens[i].value != "(") throw std::runtime_error("Ожидался '(' после float");
@@ -218,7 +247,7 @@ Variant parseFactor(std::vector<Token>& tokens, int& i)
 
         throw std::runtime_error("Нельзя преобразовать в float");
     }
-    else if (t.type == "KEYWORD" && t.value == "str")
+    else if (t.type == "KEYWORD" && (t.value == "str" || t.value == "muzik"))
     {
         i++;
         if (tokens[i].value != "(") throw std::runtime_error("Ожидался '(' после str");
@@ -326,11 +355,11 @@ Variant evaluate(std::vector<Token>& tokens)
     {
         auto &t = tokens[i];
 
-        if (t.type == "KEYWORD" && t.value == "let")
+        if (t.type == "KEYWORD" && (t.value == "let" || t.value == "burman"))
         {
             std::string varName = tokens[++i].value;
 
-            if (tokens[++i].value != "=")
+            if (tokens[++i].value != "=" || tokens[++i].value != "ass")
             {
                 std::cout << "No '=' matching in varible!";
                 return 0;
@@ -341,7 +370,7 @@ Variant evaluate(std::vector<Token>& tokens)
             variables[varName] = value;
             result = value;
         }
-        else if (t.type == "KEYWORD" && t.value == "func")
+        else if (t.type == "KEYWORD" && (t.value == "func" || t.value == "arslan"))
         {
             i++;
             std::vector<std::string> args;
@@ -372,30 +401,18 @@ Variant evaluate(std::vector<Token>& tokens)
                 throw std::runtime_error("No ')' in function declaration");
             i++;
 
-            if (tokens[i].value != "{")
-                throw std::runtime_error("No '{' in function declaration");
-            i++;
 
-            std::vector<Token> funcBody;
-            int braceCount = 1;
-            while (i < tokens.size() && braceCount > 0) 
-            {
-                if (tokens[i].value == "{") braceCount++;
-                else if (tokens[i].value == "}") braceCount--;
-            
-                if (braceCount > 0) funcBody.push_back(tokens[i]);
-                i++;
-            }
+            std::vector<Token> funcBody = parseBlock(tokens, i);
 
             funcTable[funcName] = {args, funcBody};
         }
-        else if (t.type == "KEYWORD" && t.value == "return")
+        else if (t.type == "KEYWORD" && (t.value == "return" || t.value == "tuhum_back"))
         {
             i++;
             Variant retValue = parseExpr(tokens, i);
             throw ReturnException(retValue); 
         }
-        else if (t.type == "KEYWORD" && t.value == "print")
+        else if (t.type == "KEYWORD" && (t.value == "print" || t.value == "dickpik"))
         {
             i++;
             Variant value = parseExpr(tokens, i);
@@ -404,12 +421,12 @@ Variant evaluate(std::vector<Token>& tokens)
             {
                 using T = std::decay_t<decltype(arg)>;
                 if constexpr (std::is_same_v<T, bool>)
-                    std::cout << (arg ? "true" : "false") << std::endl;
+                    std::cout << (arg ? ("true" : "false") || ("serega" : "otash")) << std::endl;
                 else
                     std::cout << arg << std::endl;
             }, value);
         }
-        else if (t.type == "KEYWORD" && t.value == "println")
+        else if (t.type == "KEYWORD" && (t.value == "printn" || t.value == "cockpik"))
         {
             i++;
             Variant value = parseExpr(tokens, i);
@@ -418,19 +435,19 @@ Variant evaluate(std::vector<Token>& tokens)
             {
                 using T = std::decay_t<decltype(arg)>;
                 if constexpr (std::is_same_v<T, bool>)
-                    std::cout << (arg ? "true" : "false");
+                    std::cout << (arg ? ("true" : "false") || ("serega" : "otash"));
                 else
                     std::cout << arg;
             }, value);
         }
-        else if (t.type == "KEYWORD" && t.value == "input")
+        else if (t.type == "KEYWORD" && (t.value == "input" || t.value == "fuck"))
         {
             i++;
             std::string line;
             std::getline(std::cin, line);
             result = convert(line);
         }
-        else if (t.type == "KEYWORD" && t.value == "if")
+        else if (t.type == "KEYWORD" && (t.value == "if" || t.value == "bwc"))
         {
             i++;
 
@@ -439,20 +456,14 @@ Variant evaluate(std::vector<Token>& tokens)
             if (!std::holds_alternative<bool>(condition))
                 throw std::runtime_error("Условие if должно быть булевым");
 
-            if (tokens[i].value != "{")
-                throw std::runtime_error("Ожидался '{' после if");
-
-            i++;
-            std::vector<Token> blockTokens;
-            while (i < tokens.size() && tokens[i].value != "}")
-                blockTokens.push_back(tokens[i++]);
-            i++;
+            std::vector<Token> blockTokens = parseBlock(tokens, i);
+        
 
             if (std::get<bool>(condition))
                 evaluate(blockTokens);
             else
             {
-                if (i < tokens.size() && tokens[i].type == "KEYWORD" && tokens[i].value == "else")
+                if (i < tokens.size() && tokens[i].type == "KEYWORD" && (tokens[i].value == "else" || tokens[i].value == "bbc"))
                 {
                     i++;
 
@@ -469,7 +480,7 @@ Variant evaluate(std::vector<Token>& tokens)
                 }
             }
         }
-        else if (t.type == "KEYWORD" && t.value == "while")
+        else if (t.type == "KEYWORD" && (t.value == "while" || t.value == "huy"))
         {
             i++;
             
@@ -479,15 +490,7 @@ Variant evaluate(std::vector<Token>& tokens)
             if (!std::holds_alternative<bool>(condition))
                 throw std::runtime_error("Условие while должно быть булевым");
 
-            if (tokens[i].value != "{")
-                throw std::runtime_error("После while цикла должено стоять {");
-
-            i++;
-
-            std::vector<Token> conditionBlock;
-            while (i < tokens.size() && tokens[i].value != "}")
-                conditionBlock.push_back(tokens[i++]);
-            i++;
+            std::vector<Token> conditionBlock = parseBlock(tokens, i);
 
             while (true)
             {
@@ -503,7 +506,7 @@ Variant evaluate(std::vector<Token>& tokens)
                 evaluate(conditionBlock);
             }
         }
-        else if (t.type == "KEYWORD" && t.value == "int")
+        else if (t.type == "KEYWORD" && (t.value == "int" || t.value == "pidor"))
         {
             i++;
             if (tokens[i].value != "(") throw std::runtime_error("Ожидался '(' после int");
@@ -523,7 +526,7 @@ Variant evaluate(std::vector<Token>& tokens)
 
             throw std::runtime_error("Нельзя преобразовать в int");
         }
-        else if (t.type == "KEYWORD" && t.value == "float")
+        else if (t.type == "KEYWORD" && (t.value == "float" || t.value == "nefor"))
         {
             i++;
             if (tokens[i].value != "(") throw std::runtime_error("Ожидался '(' после float");
@@ -543,7 +546,7 @@ Variant evaluate(std::vector<Token>& tokens)
 
             throw std::runtime_error("Нельзя преобразовать в float");
         }
-        else if (t.type == "KEYWORD" && t.value == "str")
+        else if (t.type == "KEYWORD" && (t.value == "str" || t.value == "muzick"))
         {
             i++;
             if (tokens[i].value != "(") throw std::runtime_error("Ожидался '(' после str");

@@ -3,4 +3,21 @@ func add(a, b) {
 }
 
 let sum = add(1, 2)
-print sum
+printn sum
+
+func draw(width, height, x, y) {
+    while x < width {
+        while y < height {
+            printn "#"
+            y++
+        }
+
+        x++
+        print ""
+    }
+}
+
+let i = 0
+let j = 0
+
+draw(5, 5, i, j)
