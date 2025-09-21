@@ -1,1 +1,14 @@
-burman privet
+burman privet = 5
+burman bool = serega
+
+dickpik privet
+cockpik bool
+
+fuck 
+
+arslan add(a, b) {
+    tuhum a + b
+}
+
+burman sum = add(5, 5)
+dickpik sum

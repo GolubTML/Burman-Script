@@ -359,7 +359,7 @@ Variant evaluate(std::vector<Token>& tokens)
         {
             std::string varName = tokens[++i].value;
 
-            if (tokens[++i].value != "=" || tokens[++i].value != "ass")
+            if (tokens[++i].value != "=" && tokens[++i].value != "ass")
             {
                 std::cout << "No '=' matching in varible!";
                 return 0;
@@ -406,7 +406,7 @@ Variant evaluate(std::vector<Token>& tokens)
 
             funcTable[funcName] = {args, funcBody};
         }
-        else if (t.type == "KEYWORD" && (t.value == "return" || t.value == "tuhum_back"))
+        else if (t.type == "KEYWORD" && (t.value == "return" || t.value == "tuhum"))
         {
             i++;
             Variant retValue = parseExpr(tokens, i);
@@ -421,7 +421,7 @@ Variant evaluate(std::vector<Token>& tokens)
             {
                 using T = std::decay_t<decltype(arg)>;
                 if constexpr (std::is_same_v<T, bool>)
-                    std::cout << (arg ? ("true" : "false") || ("serega" : "otash")) << std::endl;
+                    std::cout << (arg ? "true" : "false") << std::endl;
                 else
                     std::cout << arg << std::endl;
             }, value);
@@ -435,7 +435,7 @@ Variant evaluate(std::vector<Token>& tokens)
             {
                 using T = std::decay_t<decltype(arg)>;
                 if constexpr (std::is_same_v<T, bool>)
-                    std::cout << (arg ? ("true" : "false") || ("serega" : "otash"));
+                    std::cout << (arg ? "true" : "false");
                 else
                     std::cout << arg;
             }, value);

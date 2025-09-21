@@ -36,7 +36,7 @@ std::vector<Token> tokenize(const std::string& src)
             --i;
 
             if ((ident == "let" || ident == "print" || ident == "printn" || ident == "input" || ident == "if" || ident == "else"  || ident == "while" || ident == "func" || ident == "return" || ident == "int" || ident == "float" || ident == "str") 
-            || (ident == "burman" || ident == "dickpik" || ident == "cockpik" || ident == "fuck" || ident == "bwc" || ident == "bbc" || ident == "huy" || ident == "arslan" || ident == "tuhum_back" || ident == "pidor" || ident == "nefor" || ident == "muzick") ) // -- THIS A PEACE OF SHIT
+            || (ident == "burman" || ident == "dickpik" || ident == "cockpik" || ident == "fuck" || ident == "bwc" || ident == "bbc" || ident == "huy" || ident == "arslan" || ident == "tuhum" || ident == "pidor" || ident == "nefor" || ident == "muzick") ) // -- THIS A PEACE OF SHIT
                 tokens.push_back({"KEYWORD", ident});
             else if ((ident == "true" || ident == "false") || (ident == "serega" || ident == "otash"))
                 tokens.push_back({"BOOL", ident});
